@@ -1,0 +1,454 @@
+﻿<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Karaoke! Fit Screen</title>
+    <link href="css/smoothness/jquery-ui-1.10.4.custom.css" rel="stylesheet">
+    <script src="js/jquery-1.10.2.js"></script>
+    <script src="js/jquery-ui-1.10.4.custom.js"></script>
+    <script src="js/jquery.highlight.js"></script>
+    <style type="text/css">
+        html, body {
+            height: 100%;
+        }
+
+        html {
+        }
+
+        #topnav {
+            width: 100%;
+            font-family: Calibri, Arial;
+            font-size: 30px;
+            height: 25px;
+            border-bottom: 1px solid black;
+        }
+
+        #topform {
+            font-size: 12px;
+            clear: none;
+            display: inline;
+        }
+
+        #toplabel {
+            line-height: 60%;
+        }
+
+        #topfileinput {
+            display: inline-block;
+        }
+
+        #topdivleft {
+            width: 70%;
+            float: left;
+        }
+
+        #topdivright {
+            float: left;
+            width: 25%;
+        }
+
+        #pasteinput {
+            height: 8px;
+            position: relative;
+            top: -3px;
+        }
+
+        #textbox {
+            clear: both;
+            font-family: 'Courier New';
+        }
+
+        #textbox1 {
+            float: left;
+            width: 100%;
+            font-family: 'Courier New';
+        }
+
+        #textbox2 {
+            float: left;
+            width: 50%;
+            font-family: 'Courier New';
+            display: none;
+        }
+
+        #textbox3 {
+            float: left;
+            width: 33%;
+            font-family: 'Courier New';
+            display: none;
+        }
+
+        #fileinput {
+            margin-left: 30px;
+            top: -3px;
+            position: relative;
+        }
+
+        #pasteinput {
+            width: 20px;
+            padding: 6px;
+        }
+        .highlight {
+            background-color: #FFFF88;
+        }
+    </style>
+
+</head>
+<body>
+
+    <div id="topnav">
+        <div id="topdivleft">
+            <div id="toplabel"> Paste Tab Here <input type="text" id="pasteinput" /> or Select File <input type="file" id="fileinput" /></div>
+        </div> <div id="topdivright">
+            <form id="topform">
+                <input type="radio" name="option" value="option1" id="option1">one div
+                <input type="radio" name="option" value="option2" id="option2">split screen (2div)
+                <input type="radio" name="option" value="option3" id="option3">three divs
+                <input type="radio" name="option" value="option4" id="option4" checked="checked">auto
+            </form>
+        </div>
+
+    </div>
+
+    <div id="slider"></div>
+
+    <div id="textbox1"> Load a text file </div>
+    <div id="textbox2"> Textbox 2</div>
+    <div id="textbox3"> Textbox 3</div>
+    <script src="jquery.fittext.js" type="text/javascript"></script>
+    <script src="prefixfree.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        //     $("#slider").on("slidechange", function (event, ui) {
+        $("#slider").on("slide", function (event, ui) {
+            if (document.getElementById('option1').checked == true) {
+                $("#textbox1").css("width", "100%");
+            }
+                // Two divs
+            else if (document.getElementById('option2').checked == true) {
+                var newWidth1 = ui.value + "%";
+                var newWidth2 = (100 - ui.value) + "%";
+                //   alert(newWidth);
+                $("#textbox1").css("width", newWidth1);
+                $("#textbox2").css("width", newWidth2);
+            }
+                // Three divs
+            else if (document.getElementById('option3').checked == true) {
+                var newWidth1 = ui.values[0] + "%";
+                var newWidth2 = (ui.values[1] - ui.values[0]) + "%";
+                var newWidth3 = (100 - ui.values[1]) + "%";
+                //   alert(newWidth);
+                $("#textbox1").css("width", newWidth1);
+                $("#textbox2").css("width", newWidth2);
+                $("#textbox3").css("width", newWidth3);
+            }
+                // Auto scale
+            else if (document.getElementById('option4').checked == true) {
+                //   if 
+   
+            }
+        });
+        //left arrow	 37
+        // up arrow	 38
+        //right arrow	 39
+        //down arrow	 40
+        var offsetCount = 0;
+        $(document).keydown(function (e) {
+            // alert("yo");
+            if (e.keyCode == 38) {  // up arrow
+                if (offsetCount > 0) offsetCount--;
+                updateTextbox(1, offsetCount);
+                updateTextbox(2, offsetCount);
+                updateTextbox(3, offsetCount);
+                return false;
+            }
+            else if (e.keyCode == 40) {  // down arrow
+                offsetCount++;
+                updateTextbox(1, offsetCount);
+                updateTextbox(2, offsetCount);
+                updateTextbox(3, offsetCount);
+          //      alert(offsetCount);
+                return false;
+            }
+            else if (e.keyCode == 37) {  // left arrow
+                screenLineHeight--;
+                updateTextbox(1, offsetCount);
+                updateTextbox(2, offsetCount);
+                updateTextbox(3, offsetCount);
+                //      alert(offsetCount);
+                return false;
+            }
+            else if (e.keyCode == 39) {  // right arrow
+                screenLineHeight++;
+                updateTextbox(1, offsetCount);
+                updateTextbox(2, offsetCount);
+                updateTextbox(3, offsetCount);
+                //      alert(offsetCount);
+                return false;
+            }
+            else if (e.keyCode == 83) {  // s
+                alert("screenLineHeight = " + screenLineHeight);
+                //      alert(offsetCount);
+                return false;
+            }
+        });
+        var screenLineHeight = 31;
+        var highlightTimeout;
+        var linesInput;
+        function updateTextbox(boxNum, offset) {
+            // break the textblock into an array of lines
+            //  global;   var lines = fileStr.split('\n');
+            
+            //     var linesTmp = lines;  // doesnt work
+            var linesTmp = fileStr.split('\n');
+            //        alert(boxNum + " and offset : " + offset + " screen height: " + screenLineHeight);
+            if (boxNum == 1) {
+                // remove one line, starting at the first position
+                linesTmp.splice(0, offset);
+                var linetmp = linesTmp[screenLineHeight];
+                linetmp = linetmp.substring(0,linetmp.length-1);
+          //      linesTmp[screenLineHeight] = "<div class=\'highlight\'>hoollalala" + linesTmp[screenLineHeight] + "</div>";
+                // join the array back into a single string
+                var newFileStr
+                newFileStr = linesTmp.join('\n');
+                //          document.getElementById("textbox1").innerText = newFileStr;
+                document.getElementById("textbox1").innerText = newFileStr;
+                //  $("#textbox1").highlight(linesTmp[screenLineHeight]);
+                $("#textbox1").highlight(linetmp);
+                clearTimeout(highlightTimeout);
+                highlightTimeout = setTimeout(function () { $("#textbox1").unhighlight(linetmp); }, 350);
+            }
+            else if (boxNum == 2) {
+                // remove one line, starting at the first position
+                linesTmp.splice(0, screenLineHeight + offset);
+                var linetmp = linesTmp[screenLineHeight];
+                linetmp = linetmp.substring(0, linetmp.length - 1);
+                // join the array back into a single string
+                var newFileStr = linesTmp.join('\n');
+
+                //            document.getElementById("textbox2").innerText = newFileStr;
+                document.getElementById("textbox2").innerText = newFileStr;
+
+                $("#textbox2").highlight(linetmp);
+                clearTimeout(highlightTimeout);
+                highlightTimeout = setTimeout(function () { $("#textbox2").unhighlight(linetmp); }, 350);
+            }
+            else if (boxNum == 3) {
+                // remove one line, starting at the first position
+                //     lines.splice(0, 52);
+                linesTmp.splice(0, screenLineHeight * 2 + offset);
+                // join the array back into a single string
+                var newFileStr = linesTmp.join('\n');
+
+                document.getElementById("textbox3").innerText = newFileStr;
+            }
+
+        }
+
+        function reformat(optionType) {
+            switch (optionType) {
+                // One div
+                case 'option1':
+                    $("#slider").slider("destroy");
+                    $("#textbox1").css("width", "100%");
+                    $("#textbox2").hide();
+                    $("#textbox3").hide();
+                    break;
+
+                    // Two divs
+                case 'option2':
+                    $("#slider").slider({
+                        range: false,
+                        step: 4,
+                        values: [50]
+                    });
+                    setTimeout(function () {
+                        $("#slider").slider({
+                            range: false,
+                            step: 4,
+                            values: [50]
+                        });
+                        updateTextbox(2, 0);
+                    }, 200);
+                    $("#textbox1").css("width", "50%");
+                    $("#textbox2").show();
+                    $("#textbox3").hide();
+                    $("#textbox2").css("width", "50%");
+                    //           alert($("#slider").slider("option", "max"));
+                    break;
+
+                    // Three divs
+                case 'option3':
+                    $("#slider").slider({
+                        range: false,
+                        step: 4,
+                        values: [33, 66]
+                    });
+                    setTimeout(function () {
+                        $("#slider").slider({
+                            range: false,
+                            step: 4,
+                            values: [33, 66]
+                        });
+                    }, 50);
+                    $("#textbox1").css("width", "33%");
+                    $("#textbox2").show();
+                    $("#textbox3").show();
+                    $("#textbox2").css("width", "33%");
+                    $("#textbox3").css("width", "33%");
+                    updateTextbox(2, 0);
+                    updateTextbox(3, 0);
+                    break;
+
+                    // Auto scale
+                case 'option4':
+                    
+                  //  lines.forEach(function (line,index) {
+           //             if (maxLineWidth < line.length) maxLineWidth = line.length;
+                    //      });
+                    var threshold1 = 0;
+                    var threshold2 = 30;
+                    
+                    var viewR;
+
+                    viewR = width() / 15;
+                    if (viewR - maxLineWidth > threshold2) reformat('option2');
+                    else if (viewR - maxLineWidth > threshold1) reformat('option3');
+                    else if (viewR <= threshold1) reformat('option1');
+                    alert('max lines: ' + maxLineWidth + ' width = ' + width());
+                    if (width() / 10)
+                    break;
+                default:
+                    alert("error, option = " + optionType);
+                    break;
+            }
+        }
+
+    //    $("#option1").attr('checked', true).trigger('click');
+        document.getElementById('option1').onclick = function () {
+            reformat("option1");
+            //    alert("yolo");
+        };
+        document.getElementById('option2').onclick = function () {
+            reformat("option2");
+            //      alert("yolo");
+        };
+        document.getElementById('option3').onclick = function () {
+            reformat("option3");
+            //      alert("yolo");
+        };
+        document.getElementById('option4').onclick = function () {
+            reformat("option4");
+            //      alert("yolo");
+        };
+        //    $('#topform').click(function () {
+        function optionClicked() {
+            var optionType;
+            if (document.getElementById('option1').checked) {
+                optionType = document.getElementById('option1').value;
+            }
+            else if (document.getElementById('option2').checked)
+                optionType = document.getElementById('option2').value;
+            else optionType = document.getElementById('option3').value;
+            reformat(optionType);
+        }
+
+        //$(function () {
+        //    $("#button").button();
+        //    $("#radioset").buttonset();
+
+
+
+        //    $("#dialog").dialog({
+        //        autoOpen: false,
+        //        width: 400,
+        //        buttons: [
+        //            {
+        //                text: "Ok",
+        //                click: function () {
+        //                    $(this).dialog("close");
+        //                }
+        //            },
+        //            {
+        //                text: "Cancel",
+        //                click: function () {
+        //                    $(this).dialog("close");
+        //                }
+        //            }
+        //        ]
+        //    });
+
+        //    // Link to open the dialog
+        //    $("#dialog-link").click(function (event) {
+        //        $("#dialog").dialog("open");
+        //        event.preventDefault();
+        //    });
+
+        //});
+
+        // Check for the various File API support.
+        if (window.File && window.FileReader && window.FileList && window.Blob) {
+            //do your stuff!
+        } else {
+            alert('The File APIs are not fully supported by your browser.');
+        }
+        var f;
+        var fileStr;
+        var lines; // = fileStr.split('\n');
+        var maxLineWidth = 0;
+        
+        function readSingleFile(evt) {
+            //Retrieve the first (and only!) File from the FileList object
+            f = evt.target.files[0];
+
+            if (f) {
+                var r = new FileReader();
+                r.onload = function (e) {
+                    var contents = e.target.result;
+                    /*      alert("Got the file.n"
+                                + "name: " + f.name + "n"
+                                + "type: " + f.type + "n"
+                                + "size: " + f.size + " bytesn"
+                                + "starts with: " + contents.substr(1, contents.indexOf("n"))
+                          );
+                      */
+                    fileStr = r.result;
+                    // break the textblock into an array of lines
+                    var lines = fileStr.split('\n');
+
+                    lines.forEach(function (line, index) {
+                     //   alert(line.length);
+                        if (maxLineWidth < line.length) maxLineWidth = line.length;
+                    });
+
+                    // remove one line, starting at the first position
+                    lines.splice(0, 26);
+                    // join the array back into a single string
+                    var newFileStr = lines.join('\n');
+
+                    var res = fileStr.substring(1, 4);
+                    //     alert("Lines: " + fileStr.split(/\r\n|\r|\n/).length);
+                    document.getElementById("textbox1").innerText = fileStr;
+                    optionClicked();
+                    //    alert("here");
+                    //        document.getElementById("textbox2").innerText = newFileStr;
+                }
+                r.readAsText(f);
+                //       document.getElementById("textbox").innerHTML = r.readAsText(f);
+            } else {
+                alert("Failed to load file");
+            }
+        }
+
+        document.getElementById('fileinput').addEventListener('change', readSingleFile, false);
+
+        function width() {
+            return window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth || 0;
+        }
+        function height() {
+            return window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
+        }
+    </script>
+</body>
+</html>
